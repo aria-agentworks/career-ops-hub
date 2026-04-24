@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id                String   @id @default(cuid())
+  fullName          String
+  title             String
+  email             String
+  phone             String?
+  location          String?
+  website           String?
+  linkedin          String?
+  github            String?
+  summary           String   @default("")
+  skills            String   @default("")
+  experience        String   @default("[]")
+  education         String   @default("[]")
+  desiredRole       String?
+  desiredSalary     String?
+  desiredLocation   String?
+  workPreference    String   @default("remote")
+  yearsOfExperience Int?
+  noticePeriod      String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  jobs              Job[]
+  evaluations       Evaluation[]
+  resumes           Resume[]
+}
+
+model Job {
+  id              String      @id @default(cuid())
+  title           String
+  company         String
+  location        String?
+  url             String?
+  description     String
+  source          String      @default("manual")
+  salaryMin       Int?
+  salaryMax       Int?
+  salaryCurrency  String      @default("USD")
+  jobType         String      @default("full-time")
+  workMode        String      @default("remote")
+  seniority       String?
+  postedDate      DateTime?
+  status          String      @default("saved")
+  score           Float?
+  grade           String?
+  scoreBreakdown  String      @default("{}")
+  evaluationNotes String?
+  tags            String      @default("")
+  profileId       String?
+  profile         Profile?   @relation(fields: [profileId], references: [id], onDelete: SetNull)
+  evaluation      Evaluation?
+  resumes         Resume[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model Evaluation {
+  id                String   @id @default(cuid())
+  jobId             String   @unique
+  profileId         String?
+  profile           Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  job               Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  roleMatch         Float    @default(0)
+  cvAlignment       Float    @default(0)
+  compensation      Float    @default(0)
+  growthPotential   Float    @default(0)
+  companyCulture    Float    @default(0)
+  technicalStack    Float    @default(0)
+  locationFit       Float    @default(0)
+  seniorityFit      Float    @default(0)
+  marketDemand      Float    @default(0)
+  overallPotential  Float    @default(0)
+  strengths         String   @default("[]")
+  weaknesses        String   @default("[]")
+  recommendations   String   @default("")
+  tailoringNotes    String   @default("")
+  createdAt         DateTime @default(now())
+}
+
+model Resume {
+  id          String   @id @default(cuid())
+  profileId   String?
+  profile     Profile? @relation(fields: [profileId], references: [id], onDelete: SetNull)
+  jobId       String?
+  job         Job?     @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  name        String
+  content     String   @default("{}")
+  generatedAt DateTime @default(now())
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
